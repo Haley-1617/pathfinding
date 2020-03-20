@@ -80,6 +80,8 @@ struct route {
     route() : position(0, 0), parent(NULL){}
 };
 
+typedef std::vector<sf::RectangleShape> vectorOfRec;
+
 class FindPath {
 private:
     std::vector<route> visited;
@@ -93,10 +95,10 @@ private:
 public:
     FindPath(const int &gridSize);
     ~FindPath(){};
-    void Update();
-    void pathfinding();
+    void Update(vectorOfRec m_obstacle);
+    void pathfinding(vectorOfRec m_obstacle);
     bool findPath() {return frontier.empty();}
-    bool find(const sf::Vector2i &cur);
+    bool find(const sf::Vector2i &cur, vectorOfRec m_obstacle);
     void render(sf::RenderWindow &window);
     bool visitIsEmpty() {return visited.empty();}
     void setStart(sf::Vector2i newStart) {m_start = newStart;}
@@ -111,13 +113,13 @@ FindPath::FindPath(const int &gridSize) {
     lengthPath = 0;
 }
 
-void FindPath::Update() {
+void FindPath::Update(vectorOfRec m_obstacle) {
 //    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
-    pathfinding();
+    pathfinding(m_obstacle);
 //    call render
 }
 
-void FindPath::pathfinding() {
+void FindPath::pathfinding(vectorOfRec m_obstacle) {
     if (visited.empty()) {
         route start(m_start.x, m_start.y);
         frontier.push_back(start);
@@ -158,7 +160,7 @@ void FindPath::pathfinding() {
             cur.position.y < 0 || cur.position.y > 1200) continue;
 //        check if the node has been visited
 //        or the node is in the frontier already
-        else if(!find(cur.position)) {
+        else if(!find(cur.position, m_obstacle)) {
             cur.parent = &visited[curIndex];
             frontier.push_back(cur);
         }
@@ -166,14 +168,22 @@ void FindPath::pathfinding() {
     frontier.pop_front();
 }
 
-bool FindPath::find(const sf::Vector2i &cur) {
+bool FindPath::find(const sf::Vector2i &cur, vectorOfRec m_obstacle) {
+//    check if the node has been visited
     std::vector<route>::iterator iterV;
     for (iterV = visited.begin(); iterV != visited.end(); iterV++)
         if (iterV->position.x == cur.x && iterV->position.y == cur.y) return true;
+//    check if the nodes is in frontier
     std::deque<route>::iterator iterF;
     for (iterF = frontier.begin(); iterF != frontier.end(); iterF++)
         if (iterF->position.x == cur.x && iterF->position.y == cur.y)
             return true;
+//    check if the node is obstacle
+    vectorOfRec::iterator iterOb;
+    for (iterOb = m_obstacle.begin(); iterOb != m_obstacle.end(); iterOb++) {
+        if (iterOb->getPosition().x == cur.x &&
+            iterOb->getPosition().y == cur.y) return true;
+    }
     return false;
 }
 
@@ -202,7 +212,7 @@ class Game {
 private:
     Window window;
     FindPath m_findPath;
-    std::vector<sf::RectangleShape> obstacle;
+    vectorOfRec obstacle;
     int gridSize;
     sf::RectangleShape start;
     sf::RectangleShape target;
@@ -301,8 +311,6 @@ void Game::handleInput() {
         }
         if (e.type == sf::Event::KeyPressed)
             if (e.key.code == sf::Keyboard::Enter) findingPath = true;
-//        if (e.type == sf::Event::KeyReleased)
-//            findingPath = false;
     }
 }
 
@@ -352,7 +360,7 @@ void Game::mouseEvent() {
                                               target.getPosition().y));
         }
 //        if (m_elapsed >= timestamp) {
-            m_findPath.Update();
+            m_findPath.Update(obstacle);
             m_elapsed -= timestamp;
             if (m_findPath.findPath()) findingPath = false;
 //        }
