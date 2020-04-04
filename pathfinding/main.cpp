@@ -155,8 +155,8 @@ void FindPath::pathfinding(vectorOfRec m_obstacle) {
         }
         
 //        check if out of range
-        if (cur->position.x < 0 || cur->position.x > 1200 ||
-            cur->position.y < 0 || cur->position.y > 1200) {
+        if (cur->position.x < 0 || cur->position.x >= 1200 ||
+            cur->position.y < 0 || cur->position.y >= 1200) {
             delete cur;
             continue;
         }
