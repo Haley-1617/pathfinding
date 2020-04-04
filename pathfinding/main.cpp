@@ -84,8 +84,8 @@ typedef std::vector<sf::RectangleShape> vectorOfRec;
 
 class FindPath {
 private:
-    std::vector<route> visited;
-    std::deque<route> frontier;
+    std::vector<route*> visited;
+    std::deque<route*> frontier;
     int gridSize;
     enum Direction {UP, RIGHT, DOWN, LEFT};
     sf::Vector2i m_start;
@@ -121,127 +121,54 @@ void FindPath::Update(vectorOfRec m_obstacle) {
 //    call render
 }
 
-//void FindPath::pathfinding(vectorOfRec m_obstacle) {
-//    if (visited.empty()) {
-//        route *start = new route(m_start.x, m_start.y);
-//        frontier.push_back(*start);
-//    }
-//    visited.push_back(frontier.front());
-//    if (visited.back().position.x == m_target.x &&
-//        visited.back().position.y == m_target.y) {
-//        pathIsFound = true;
-//        return;
-//    }
-//    for (int d = UP; d <= LEFT; d++) {
-//        route *cur = new route;
-//        if (!frontier.empty() && frontier.size() - 1 >= 1)
-//            std::cout << "checkIfCurChange: " << frontier[1].parent->position.x << ", " << frontier[1].parent->position.y << std::endl;
-//        switch(d) {
-//            case UP:
-//                cur->position.x = frontier.front().position.x;
-//                cur->position.y = frontier.front().position.y - gridSize;
-//                break;
-//            case RIGHT:
-//                cur->position.x = frontier.front().position.x + gridSize;
-//                cur->position.y = frontier.front().position.y;
-//                break;
-//            case DOWN:
-//                cur->position.x = frontier.front().position.x;
-//                cur->position.y = frontier.front().position.y + gridSize;
-//                break;
-//            case LEFT:
-//                cur->position.x = frontier.front().position.x - gridSize;
-//                cur->position.y = frontier.front().position.y;
-//                break;
-//        }
-//
-////        check if out of range
-//        if (cur->position.x < 0 || cur->position.x > 1200 ||
-//            cur->position.y < 0 || cur->position.y > 1200) {
-//            delete cur;
-//            continue;
-//        }
-////        check if the node has been visited
-////        or the node is in the frontier already
-//        else if(!find(cur->position, m_obstacle)) {
-////            std::cout << "last node in visited: " << visited[curIndex].position.x << ", " <<
-////            visited[curIndex].position.y << std::endl;
-////            std::cout << "In loop, curIndex: " << curIndex << std::endl;
-////            cur->parent = &visited[curIndex];
-//            std::cout << "cur: (" << cur->position.x << ", " << cur->position.y << ") | ";
-//            std::cout << "visited.back(): (" << visited.back().position.x << ", " <<
-//            visited.back().position.y << ") | ";
-//            cur->parent = &visited.back();
-////            std::cout << "cur's parent: " << cur->parent->position.x
-////            << " | " << cur->parent->position.y << std::endl;
-//            frontier.push_back(*cur);
-//            std::cout << "cur->parent: (" << frontier.back().parent->position.x << ", " <<
-//            frontier.back().parent->position.y << ")" << std::endl;
-//        }
-//        else delete cur;
-//    }
-//    frontier.pop_front();
-//}
-
 void FindPath::pathfinding(vectorOfRec m_obstacle) {
     if (visited.empty()) {
-        route start(m_start.x, m_start.y);
+        route *start = new route(m_start.x, m_start.y);
         frontier.push_back(start);
     }
     
     visited.push_back(frontier.front());
-    if (visited.back().position.x == m_target.x &&
-        visited.back().position.y == m_target.y) {
+    if (visited.back()->position.x == m_target.x &&
+        visited.back()->position.y == m_target.y) {
         pathIsFound = true;
         return;
     }
     for (int d = UP; d <= LEFT; d++) {
-        route cur(0, 0);
-        if (!frontier.empty() && frontier.size() - 1 >= 1)
-            std::cout << "checkIfCurChangeinFrontier: " << frontier[1].parent->position.x << ", " << frontier[1].parent->position.y << std::endl;
-        if (!visited.empty() && visited.size() - 1 >= 1)
-        std::cout << "checkIfCurChangeinVisited: " << visited[1].parent->position.x << ", " << visited[1].parent->position.y << std::endl;
-        
+        route *cur = new route(0, 0);
         switch(d) {
             case UP:
-                cur.position.x = frontier.front().position.x;
-                cur.position.y = frontier.front().position.y - gridSize;
+                cur->position.x = frontier.front()->position.x;
+                cur->position.y = frontier.front()->position.y - gridSize;
                 break;
             case RIGHT:
-                cur.position.x = frontier.front().position.x + gridSize;
-                cur.position.y = frontier.front().position.y;
+                cur->position.x = frontier.front()->position.x + gridSize;
+                cur->position.y = frontier.front()->position.y;
                 break;
             case DOWN:
-                cur.position.x = frontier.front().position.x;
-                cur.position.y = frontier.front().position.y + gridSize;
+                cur->position.x = frontier.front()->position.x;
+                cur->position.y = frontier.front()->position.y + gridSize;
                 break;
             case LEFT:
-                cur.position.x = frontier.front().position.x - gridSize;
-                cur.position.y = frontier.front().position.y;
+                cur->position.x = frontier.front()->position.x - gridSize;
+                cur->position.y = frontier.front()->position.y;
                 break;
         }
         
 //        check if out of range
-        if (cur.position.x < 0 || cur.position.x > 1200 ||
-            cur.position.y < 0 || cur.position.y > 1200) continue;
+        if (cur->position.x < 0 || cur->position.x > 1200 ||
+            cur->position.y < 0 || cur->position.y > 1200) {
+            delete cur;
+            continue;
+        }
 //        check if the node has been visited
 //        or the node is in the frontier already
-        else if(!find(cur.position, m_obstacle)) {
-//            std::cout << "last node in visited: " << visited[curIndex].position.x << ", " <<
-//            visited[curIndex].position.y << std::endl;
-//            std::cout << "In loop, curIndex: " << curIndex << std::endl;
-//            cur->parent = &visited[curIndex];
-            std::cout << "cur: (" << cur.position.x << ", " << cur.position.y << ") | ";
-            std::cout << "visited.back(): (" << visited.back().position.x << ", " <<
-            visited.back().position.y << ") | ";
-             
-            cur.parent = &visited.back();
-//            std::cout << "cur's parent: " << cur->parent->position.x
-//            << " | " << cur->parent->position.y << std::endl;
+        else if (find(cur->position, m_obstacle)) {
+            delete cur;
+            continue;
+        }
+        else {
+            cur->parent = visited.back();
             frontier.push_back(cur);
-            std::cout << "cur->parent: (" << frontier.back().parent->position.x << ", " <<
-            frontier.back().parent->position.y << ")" << std::endl;
-            std::cout << "cur->&parent: " << &(frontier.back().parent) << std::endl;
         }
     }
     frontier.pop_front();
@@ -249,13 +176,13 @@ void FindPath::pathfinding(vectorOfRec m_obstacle) {
 
 bool FindPath::find(sf::Vector2i cur, vectorOfRec m_obstacle) {
 //    check if the node has been visited
-    std::vector<route>::iterator iterV;
+    std::vector<route*>::iterator iterV;
     for (iterV = visited.begin(); iterV != visited.end(); iterV++)
-        if (iterV->position.x == cur.x && iterV->position.y == cur.y) return true;
+        if ((*iterV)->position.x == cur.x && (*iterV)->position.y == cur.y) return true;
 //    check if the nodes is in frontier
-    std::deque<route>::iterator iterF;
+    std::deque<route*>::iterator iterF;
     for (iterF = frontier.begin(); iterF != frontier.end(); iterF++)
-        if (iterF->position.x == cur.x && iterF->position.y == cur.y)
+        if ((*iterF)->position.x == cur.x && (*iterF)->position.y == cur.y)
             return true;
 //    check if the node is obstacle
     vectorOfRec::iterator iterOb;
@@ -267,43 +194,53 @@ bool FindPath::find(sf::Vector2i cur, vectorOfRec m_obstacle) {
 }
 
 void FindPath::render(sf::RenderWindow &window) {
-    if (!visited.empty() && visited.size() - 1 >= 1)
-        std::cout << "checkIfChange: " << visited[1].parent->position.x << ", " << visited[1].parent->position.y << std::endl;
 //    draw visited node
-    std::vector<route>::iterator iterV;
+    std::vector<route*>::iterator iterV;
     sf::RectangleShape temp;
     temp.setSize(sf::Vector2f(gridSize, gridSize));
     temp.setFillColor(sf::Color(187, 236, 237));
     for (iterV = visited.begin(); iterV != visited.end(); iterV++) {
-        if ((iterV->position.x == m_start.x && iterV->position.y == m_start.y) ||
-            (iterV->position.x == m_target.x && iterV->position.y == m_target.y)) continue;
-        temp.setPosition(iterV->position.x, iterV->position.y);
+        if (((*iterV)->position.x == m_start.x && (*iterV)->position.y == m_start.y) ||
+            ((*iterV)->position.x == m_target.x && (*iterV)->position.y == m_target.y)) continue;
+        temp.setPosition((*iterV)->position.x, (*iterV)->position.y);
         window.draw(temp);
     }
 //    draw frontier
-    std::deque<route>::iterator iterF;
+    std::deque<route*>::iterator iterF;
     temp.setFillColor(sf::Color(175, 247, 162));
     for (iterF = frontier.begin(); iterF != frontier.end(); iterF++) {
-        if ((iterF->position.x == m_start.x && iterF->position.y == m_start.y) ||
-        (iterF->position.x == m_target.x && iterF->position.y == m_target.y)) continue;
-        temp.setPosition(iterF->position.x, iterF->position.y);
+        if (((*iterF)->position.x == m_start.x && (*iterF)->position.y == m_start.y) ||
+        ((*iterF)->position.x == m_target.x && (*iterF)->position.y == m_target.y)) continue;
+        temp.setPosition((*iterF)->position.x, (*iterF)->position.y);
         window.draw(temp);
     }
 //    draw path if found
     if (pathIsFound) {
-//        route *temp = &visited.back();
-//        route *parent = temp->parent;
-//        sf::RectangleShape line;
-//        while (parent) {
-//            if (temp->position.x - parent->position.x == 0)
-//                line.setSize(sf::Vector2f(5, abs(temp->position.y - parent->position.y)));
-//            else line.setSize(sf::Vector2f(abs(temp->position.x - parent->position.x), 5));
-//            line.setPosition(parent->position.x, parent->position.y);
-//            line.setFillColor(sf::Color::Yellow);
-//            window.draw(line);
-//            temp = parent;
-//            parent = parent->parent;
-//        }
+        route *temp = visited.back();
+        route *parent = temp->parent;
+        sf::RectangleShape line;
+        std::string drawFrom = "";
+        while (parent) {
+//            vertical direction
+            if (temp->position.x - parent->position.x == 0) {
+                line.setSize(sf::Vector2f(5, abs(temp->position.y - parent->position.y)));
+                if (parent->position.y < temp->position.y) drawFrom = "parent";
+                else drawFrom = "temp";
+            }
+//            horizontal direction
+            else {
+                line.setSize(sf::Vector2f(abs(temp->position.x - parent->position.x), 5));
+                if (parent->position.x < temp->position.x) drawFrom = "parent";
+                else drawFrom = "temp";
+            }
+            if (drawFrom == "parent")
+                line.setPosition(parent->position.x + gridSize / 2, parent->position.y + gridSize / 2);
+            else line.setPosition(temp->position.x + gridSize / 2, temp->position.y + gridSize / 2);
+            line.setFillColor(sf::Color::Yellow);
+            window.draw(line);
+            temp = parent;
+            parent = parent->parent;
+        }
         
     }
 }
