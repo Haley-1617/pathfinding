@@ -95,7 +95,7 @@ private:
     
 public:
     FindPath(const int &gridSize);
-    ~FindPath(){};
+    ~FindPath();
     void Update(vectorOfRec m_obstacle);
     void pathfinding(vectorOfRec m_obstacle);
     bool findPath() {return pathIsFound;}
@@ -113,6 +113,14 @@ FindPath::FindPath(const int &gridSize) {
     route startPoint(m_start.x, m_start.y);
     lengthPath = 0;
     pathIsFound = false;
+}
+
+FindPath::~FindPath() {
+    std::vector<route*>::iterator iterV;
+    for (iterV = visited.begin(); iterV != visited.end(); ++iterV)
+        delete *iterV;
+    visited.clear();
+    frontier.clear();
 }
 
 void FindPath::Update(vectorOfRec m_obstacle) {
